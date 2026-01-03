@@ -1,7 +1,6 @@
 package com.reelance.config;
 
 import com.reelance.service.JwtAuthFilter;
-import com.reelance.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,11 +25,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
-                                "/api/influencers/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
+
+                        // 🔓 PUBLIC
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/influencers/**"
+                        ).permitAll()
+
+                        // 👤 INFLUENCER ACTIONS (MUST COME FIRST)
+                        .requestMatchers(
+                                "/api/influencer/**",
+                                "/api/collaborations/influencer/**"
+                        ).hasRole("INFLUENCER")
+
+                        // 🏢 BRAND ACTIONS
+                        .requestMatchers(
+                                "/api/collaborations/brand/**"
+                        ).hasRole("BRAND")
+
+                        // 🔐 EVERYTHING ELSE
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
@@ -41,14 +57,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

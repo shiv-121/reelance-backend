@@ -26,39 +26,39 @@ public class CollaborationController {
         this.userService = userService;
     }
 
-    // BRAND → SEND REQUEST
-    @PostMapping
+    // ================================
+    // 🏢 BRAND → SEND REQUEST
+    // ================================
+    @PostMapping("/brand")
     public CollaborationResponse sendRequest(
             Authentication authentication,
             @Valid @RequestBody CollaborationRequestDto dto) {
 
-        String email = authentication.getName(); // from JWT
-        User brand = userService.findByEmail(email);
-
+        User brand = userService.findByEmail(authentication.getName());
         return service.sendRequest(brand, dto);
     }
 
-    // INFLUENCER → VIEW REQUESTS
+    // ================================
+    // 👤 INFLUENCER → VIEW REQUESTS
+    // ================================
     @GetMapping("/influencer")
     public List<CollaborationResponse> influencerRequests(
             Authentication authentication) {
 
-        User influencer =
-                userService.findByEmail(authentication.getName());
-
+        User influencer = userService.findByEmail(authentication.getName());
         return service.getInfluencerRequests(influencer);
     }
 
-    // INFLUENCER → ACCEPT / REJECT
-    @PatchMapping("/{id}")
+    // ================================
+    // 👤 INFLUENCER → ACCEPT / REJECT
+    // ================================
+    @PatchMapping("/influencer/{id}")
     public CollaborationResponse updateStatus(
             @PathVariable Long id,
             @RequestParam CollaborationStatus status,
             Authentication authentication) {
 
-        User influencer =
-                userService.findByEmail(authentication.getName());
-
+        User influencer = userService.findByEmail(authentication.getName());
         return service.updateStatus(id, status, influencer);
     }
 }
