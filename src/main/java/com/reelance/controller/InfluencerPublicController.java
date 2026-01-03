@@ -36,4 +36,12 @@ public class InfluencerPublicController {
                 sort
         );
     }
+
+    @GetMapping("/{id}")
+    public InfluencerProfileResponse getInfluencer(
+            @PathVariable Long id) {
+
+        return service.getInfluencerById(id);
+    }
+
 }

@@ -64,4 +64,21 @@ public class InfluencerPublicService {
                 profile.getUser().getUsername()
         );
     }
+
+    public InfluencerProfileResponse getInfluencerById(Long id) {
+
+        InfluencerProfile profile = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Influencer not found"));
+
+        return new InfluencerProfileResponse(
+                profile.getId(),
+                profile.getInstagramHandle(),
+                profile.getFollowers(),
+                profile.getNiche(),
+                profile.getPricePerPost(),
+                profile.getUser().getUsername()
+        );
+    }
+
 }
