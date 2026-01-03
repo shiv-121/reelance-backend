@@ -7,26 +7,25 @@ import lombok.*;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-@Table(name = "influencer_profiles")
+@Table(
+        name = "influencer_profile",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "instagram_handle")
+        }
+)
 public class InfluencerProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "instagram_handle", nullable = false, unique = true)
     private String instagramHandle;
 
-    @Column(nullable = false)
-    private Integer followers;
-
-    @Column(nullable = false)
-    private String niche; // fashion, tech, fitness
-
-    @Column(nullable = false)
-    private Integer pricePerPost;
+    private Long followers;
+    private String niche;
+    private Long pricePerPost;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 }

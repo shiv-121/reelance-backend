@@ -66,7 +66,7 @@ public class CollaborationService {
     // INFLUENCER → ACCEPT / REJECT
     public CollaborationResponse updateStatus(
             Long requestId,
-            CollaborationStatus status,
+            CollaborationStatus newStatus,
             User influencer) {
 
         CollaborationRequest request = repository.findById(requestId)
@@ -77,9 +77,24 @@ public class CollaborationService {
             throw new RuntimeException("Unauthorized");
         }
 
-        request.setStatus(status);
+        CollaborationStatus currentStatus = request.getStatus();
+
+        // 🚫 Invalid transitions
+        if (currentStatus != CollaborationStatus.PENDING) {
+            throw new RuntimeException(
+                    "Cannot update collaboration in status: " + currentStatus
+            );
+        }
+
+        if (newStatus != CollaborationStatus.ACCEPTED &&
+                newStatus != CollaborationStatus.REJECTED) {
+            throw new RuntimeException("Invalid status change");
+        }
+
+        request.setStatus(newStatus);
         return mapToResponse(repository.save(request));
     }
+
 
     private CollaborationResponse mapToResponse(CollaborationRequest r) {
         return new CollaborationResponse(
@@ -109,5 +124,28 @@ public class CollaborationService {
                 .map(this::mapToResponse)
                 .toList();
     }
+
+    // BRAND → MARK COMPLETED
+    public CollaborationResponse completeCollaboration(
+            Long requestId,
+            User brand) {
+
+        CollaborationRequest request = repository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (!request.getBrand().getId().equals(brand.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (request.getStatus() != CollaborationStatus.ACCEPTED) {
+            throw new RuntimeException(
+                    "Only accepted collaborations can be completed"
+            );
+        }
+
+        request.setStatus(CollaborationStatus.COMPLETED);
+        return mapToResponse(repository.save(request));
+    }
+
 
 }

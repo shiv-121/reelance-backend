@@ -52,4 +52,17 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+    @ExceptionHandler(InstagramHandleAlreadyExistsException.class)
+    public ResponseEntity<?> handleInstagramExists(
+            InstagramHandleAlreadyExistsException ex) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Map.of(
+                        "status", 409,
+                        "error", "INSTAGRAM_HANDLE_EXISTS",
+                        "message", ex.getMessage()
+                )
+        );
+    }
+
 }

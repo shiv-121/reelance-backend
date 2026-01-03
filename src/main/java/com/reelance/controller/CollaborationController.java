@@ -76,4 +76,17 @@ public class CollaborationController {
         User influencer = userService.findByEmail(authentication.getName());
         return service.updateStatus(id, status, influencer);
     }
+
+    // BRAND → COMPLETE COLLABORATION
+    @PatchMapping("/brand/{id}/complete")
+    public CollaborationResponse complete(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        User brand =
+                userService.findByEmail(authentication.getName());
+
+        return service.completeCollaboration(id, brand);
+    }
+
 }

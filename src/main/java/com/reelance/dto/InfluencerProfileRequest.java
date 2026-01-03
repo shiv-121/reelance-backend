@@ -13,12 +13,12 @@ public class InfluencerProfileRequest {
 
     @NotNull
     @Min(0)
-    private Integer followers;
+    private Long followers;
 
     @NotBlank
     private String niche;
 
     @NotNull
     @Min(100)
-    private Integer pricePerPost;
+    private Long pricePerPost;
 }

@@ -9,8 +9,9 @@ public class InfluencerProfileResponse {
 
     private Long id;
     private String instagramHandle;
-    private Integer followers;
+    private Long followers;
     private String niche;
-    private Integer pricePerPost;
+    private Long pricePerPost;
     private String username;
 }
+

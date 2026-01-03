@@ -21,4 +21,9 @@ public interface InfluencerProfileRepository
             String niche,
             Pageable pageable
     );
+
+    boolean existsByInstagramHandleIgnoreCase(String instagramHandle);
+
+    Optional<InfluencerProfile> findByInstagramHandleIgnoreCase(
+            String instagramHandle);
 }
