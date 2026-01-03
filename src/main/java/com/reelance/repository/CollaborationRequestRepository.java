@@ -18,4 +18,10 @@ public interface CollaborationRequestRepository
             Long influencerProfileId,
             CollaborationStatus status
     );
+
+    List<CollaborationRequest> findByBrand_IdAndStatus(
+            Long brandId,
+            CollaborationStatus status
+    );
+
 }

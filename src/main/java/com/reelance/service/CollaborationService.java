@@ -90,4 +90,24 @@ public class CollaborationService {
                 r.getStatus()
         );
     }
+    // BRAND → VIEW ALL REQUESTS
+    public List<CollaborationResponse> getBrandRequests(User brand) {
+
+        return repository.findByBrand_Id(brand.getId())
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // BRAND → VIEW REQUESTS BY STATUS (OPTIONAL BUT RECOMMENDED)
+    public List<CollaborationResponse> getBrandRequestsByStatus(
+            User brand,
+            CollaborationStatus status) {
+
+        return repository.findByBrand_IdAndStatus(brand.getId(), status)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
 }

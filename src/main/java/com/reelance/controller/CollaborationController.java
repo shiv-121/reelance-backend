@@ -26,10 +26,10 @@ public class CollaborationController {
         this.userService = userService;
     }
 
-    // ================================
-    // 🏢 BRAND → SEND REQUEST
-    // ================================
-    @PostMapping("/brand")
+    // ======================
+    // BRAND → SEND REQUEST
+    // ======================
+    @PostMapping
     public CollaborationResponse sendRequest(
             Authentication authentication,
             @Valid @RequestBody CollaborationRequestDto dto) {
@@ -38,9 +38,24 @@ public class CollaborationController {
         return service.sendRequest(brand, dto);
     }
 
-    // ================================
-    // 👤 INFLUENCER → VIEW REQUESTS
-    // ================================
+    // ======================
+    // BRAND → DASHBOARD
+    // ======================
+    @GetMapping("/brand")
+    public List<CollaborationResponse> brandRequests(
+            Authentication authentication,
+            @RequestParam(required = false) CollaborationStatus status) {
+
+        User brand = userService.findByEmail(authentication.getName());
+
+        return (status == null)
+                ? service.getBrandRequests(brand)
+                : service.getBrandRequestsByStatus(brand, status);
+    }
+
+    // ======================
+    // INFLUENCER → VIEW REQUESTS
+    // ======================
     @GetMapping("/influencer")
     public List<CollaborationResponse> influencerRequests(
             Authentication authentication) {
@@ -49,9 +64,9 @@ public class CollaborationController {
         return service.getInfluencerRequests(influencer);
     }
 
-    // ================================
-    // 👤 INFLUENCER → ACCEPT / REJECT
-    // ================================
+    // ======================
+    // INFLUENCER → ACCEPT / REJECT
+    // ======================
     @PatchMapping("/influencer/{id}")
     public CollaborationResponse updateStatus(
             @PathVariable Long id,
