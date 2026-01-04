@@ -23,16 +23,18 @@ public class ReviewController {
         this.userService = userService;
     }
 
-    @PostMapping("/{collaborationId}")
-    public ReviewResponse review(
-            @PathVariable Long collaborationId,
+    /**
+     * CREATE REVIEW (Brand or Influencer)
+     * Only allowed after collaboration is COMPLETED
+     */
+    @PostMapping
+    public ReviewResponse createReview(
             @Valid @RequestBody ReviewRequest request,
             Authentication authentication) {
 
         User reviewer =
                 userService.findByEmail(authentication.getName());
 
-        return service.submitReview(
-                collaborationId, reviewer, request);
+        return service.createReview(reviewer, request);
     }
 }

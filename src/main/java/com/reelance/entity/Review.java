@@ -1,34 +1,46 @@
 package com.reelance.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-
 @Entity
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"collaboration_id", "reviewer_id"}
+        )
+)
 public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // 🔗 Collaboration
+    @ManyToOne(optional = false)
     private CollaborationRequest collaboration;
 
-    @ManyToOne
-    private User reviewer;   // BRAND or INFLUENCER
+    // 👤 Who wrote the review
+    @ManyToOne(optional = false)
+    private User reviewer;
 
-    @ManyToOne
-    private User reviewee;   // INFLUENCER or BRAND
+    // 👤 Who is being reviewed
+    @ManyToOne(optional = false)
+    private User reviewee;
 
-    private int rating;      // 1–5
+    @Min(1)
+    @Max(5)
+    private int rating;
 
+    @Column(length = 1000)
     private String comment;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

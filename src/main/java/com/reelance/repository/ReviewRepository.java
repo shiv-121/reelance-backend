@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ReviewRepository
-        extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByCollaboration_IdAndReviewer_Id(
             Long collaborationId,
@@ -13,4 +12,7 @@ public interface ReviewRepository
     );
 
     List<Review> findByReviewee_Id(Long userId);
+
+    Double findAverageRatingByReviewee_Id(Long userId);
 }
+
