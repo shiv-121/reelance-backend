@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CollaborationResponse {
 
-    private Long id;
+    private Long collaborationId;
     private String brandName;
     private String influencerUsername;
     private String message;

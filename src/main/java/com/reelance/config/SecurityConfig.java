@@ -47,8 +47,12 @@ public class SecurityConfig {
                                 "/api/collaborations/brand/**"
                         ).hasRole("BRAND")
 
+                        .requestMatchers("/api/reviews/**")
+                        .authenticated()
+
                         // 🔐 EVERYTHING ELSE
                         .anyRequest().authenticated()
+
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
