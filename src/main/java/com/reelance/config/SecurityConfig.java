@@ -29,13 +29,13 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 PUBLIC
+                        // 🔓 PUBLIC ENDPOINTS
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/influencers/**"
                         ).permitAll()
 
-                        // 👤 INFLUENCER ACTIONS (MUST COME FIRST)
+                        // 👤 INFLUENCER ACTIONS (ORDER MATTERS)
                         .requestMatchers(
                                 "/api/influencer/**",
                                 "/api/collaborations/influencer/**"
@@ -43,6 +43,7 @@ public class SecurityConfig {
 
                         // 🏢 BRAND ACTIONS
                         .requestMatchers(
+                                "/api/collaborations",
                                 "/api/collaborations/brand/**"
                         ).hasRole("BRAND")
 

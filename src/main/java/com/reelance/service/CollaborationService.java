@@ -5,10 +5,12 @@ import com.reelance.dto.CollaborationResponse;
 import com.reelance.entity.*;
 import com.reelance.repository.CollaborationRequestRepository;
 import com.reelance.repository.InfluencerProfileRepository;
+import com.reelance.util.CollaborationStatusValidator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CollaborationService {
@@ -63,32 +65,56 @@ public class CollaborationService {
                 .toList();
     }
 
-    // INFLUENCER → ACCEPT / REJECT
     public CollaborationResponse updateStatus(
             Long requestId,
             CollaborationStatus newStatus,
-            User influencer) {
-
+            User actor
+    ) {
         CollaborationRequest request = repository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        if (!request.getInfluencerProfile().getUser().getId()
-                .equals(influencer.getId())) {
+        boolean isBrand =
+                request.getBrand().getId().equals(actor.getId());
+
+        boolean isInfluencer =
+                request.getInfluencerProfile()
+                        .getUser()
+                        .getId()
+                        .equals(actor.getId());
+
+        if (!isBrand && !isInfluencer) {
             throw new RuntimeException("Unauthorized");
         }
 
-        CollaborationStatus currentStatus = request.getStatus();
-
-        // 🚫 Invalid transitions
-        if (currentStatus != CollaborationStatus.PENDING) {
-            throw new RuntimeException(
-                    "Cannot update collaboration in status: " + currentStatus
-            );
+        // ROLE RULES
+        if (isBrand &&
+                !Set.of(
+                        CollaborationStatus.CANCELLED,
+                        CollaborationStatus.COMPLETED
+                ).contains(newStatus)) {
+            throw new RuntimeException("Brand cannot set this status");
         }
 
-        if (newStatus != CollaborationStatus.ACCEPTED &&
-                newStatus != CollaborationStatus.REJECTED) {
-            throw new RuntimeException("Invalid status change");
+        if (isInfluencer &&
+                !Set.of(
+                        CollaborationStatus.ACCEPTED,
+                        CollaborationStatus.REJECTED,
+                        CollaborationStatus.DELIVERED
+                ).contains(newStatus)) {
+            throw new RuntimeException("Influencer cannot set this status");
+        }
+
+        // STATE VALIDATION
+        if (!CollaborationStatusValidator.isValidTransition(
+                request.getStatus(),
+                newStatus
+        )) {
+            throw new RuntimeException(
+                    "Invalid status transition: "
+                            + request.getStatus()
+                            + " → "
+                            + newStatus
+            );
         }
 
         request.setStatus(newStatus);
