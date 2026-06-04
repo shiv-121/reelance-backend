@@ -47,11 +47,22 @@ public class SecurityConfig {
                                 "/api/collaborations/influencer/**"
                         ).hasRole("INFLUENCER")
 
+                        // Allow authenticated users (including influencers) to browse open campaigns
+                        .requestMatchers(
+                                "/api/campaigns"
+                        ).authenticated()
+
                         // 🏢 BRAND ACTIONS
                         .requestMatchers(
                                 "/api/collaborations",
-                                "/api/collaborations/brand/**"
+                                "/api/collaborations/brand/**",
+                                // Brands can create/manage campaigns (other than the public browse endpoint)
+                                "/api/campaigns/**"
                         ).hasRole("BRAND")
+
+                        // 📋 CAMPAIGN APPLICATIONS
+                        .requestMatchers("/api/campaign-applications/**")
+                        .authenticated()
 
                         .requestMatchers("/api/reviews/**")
                         .authenticated()
