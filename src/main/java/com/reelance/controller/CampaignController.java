@@ -60,5 +60,35 @@ public class CampaignController {
 
         return service.getOpenCampaigns();
     }
+
+    // BRAND → CLOSE CAMPAIGN
+    @PatchMapping("/{id}/close")
+    public CampaignResponse closeCampaign(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        User brand =
+                userService.findByEmail(
+                        authentication.getName());
+
+        return service.closeCampaign(
+                id,
+                brand);
+    }
+
+    // BRAND → COMPLETE CAMPAIGN
+    @PatchMapping("/{id}/complete")
+    public CampaignResponse completeCampaign(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        User brand =
+                userService.findByEmail(
+                        authentication.getName());
+
+        return service.completeCampaign(
+                id,
+                brand);
+    }
 }
 

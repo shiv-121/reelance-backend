@@ -62,6 +62,64 @@ public class CampaignService {
                 .toList();
     }
 
+    // BRAND → CLOSE CAMPAIGN
+    public CampaignResponse closeCampaign(
+            Long campaignId,
+            User brand) {
+
+        Campaign campaign =
+                repository.findById(campaignId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Campaign not found"));
+
+        if (!campaign.getBrand()
+                .getId()
+                .equals(brand.getId())) {
+
+            throw new RuntimeException(
+                    "Unauthorized");
+        }
+
+        if (campaign.getStatus() == CampaignStatus.COMPLETED) {
+            throw new RuntimeException(
+                    "Campaign already completed");
+        }
+
+        campaign.setStatus(CampaignStatus.CLOSED);
+
+        return map(repository.save(campaign));
+    }
+
+    // BRAND → COMPLETE CAMPAIGN
+    public CampaignResponse completeCampaign(
+            Long campaignId,
+            User brand) {
+
+        Campaign campaign =
+                repository.findById(campaignId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Campaign not found"));
+
+        if (!campaign.getBrand()
+                .getId()
+                .equals(brand.getId())) {
+
+            throw new RuntimeException(
+                    "Unauthorized");
+        }
+
+        if (campaign.getStatus() == CampaignStatus.OPEN) {
+            throw new RuntimeException(
+                    "Close campaign before completing");
+        }
+
+        campaign.setStatus(CampaignStatus.COMPLETED);
+
+        return map(repository.save(campaign));
+    }
+
     private CampaignResponse map(
             Campaign campaign) {
 
