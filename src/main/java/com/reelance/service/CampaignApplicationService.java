@@ -4,6 +4,7 @@ import com.reelance.dto.CampaignApplicationRequest;
 import com.reelance.dto.CampaignApplicationResponse;
 import com.reelance.entity.*;
 import com.reelance.repository.CampaignApplicationRepository;
+import com.reelance.repository.CampaignParticipantRepository;
 import com.reelance.repository.CampaignRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,16 @@ public class CampaignApplicationService {
 
     private final CampaignApplicationRepository repository;
     private final CampaignRepository campaignRepository;
+    private final CampaignParticipantRepository participantRepository;
 
     public CampaignApplicationService(
             CampaignApplicationRepository repository,
-            CampaignRepository campaignRepository) {
+            CampaignRepository campaignRepository,
+            CampaignParticipantRepository participantRepository) {
 
         this.repository = repository;
         this.campaignRepository = campaignRepository;
+        this.participantRepository = participantRepository;
     }
 
     // INFLUENCER → APPLY
@@ -103,6 +107,22 @@ public class CampaignApplicationService {
         }
 
         application.setStatus(status);
+
+        // If application is accepted, create a participant
+        if (status == ApplicationStatus.ACCEPTED) {
+            if (!participantRepository.existsByCampaign_IdAndInfluencer_Id(
+                    application.getCampaign().getId(),
+                    application.getInfluencer().getId())) {
+
+                participantRepository.save(
+                        CampaignParticipant.builder()
+                                .campaign(application.getCampaign())
+                                .influencer(application.getInfluencer())
+                                .joinedAt(LocalDateTime.now())
+                                .build()
+                );
+            }
+        }
 
         return map(repository.save(application));
     }

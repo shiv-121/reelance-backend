@@ -1,8 +1,10 @@
 package com.reelance.controller;
 
+import com.reelance.dto.CampaignParticipantResponse;
 import com.reelance.dto.CampaignRequest;
 import com.reelance.dto.CampaignResponse;
 import com.reelance.entity.User;
+import com.reelance.service.CampaignParticipantService;
 import com.reelance.service.CampaignService;
 import com.reelance.service.UserService;
 import jakarta.validation.Valid;
@@ -17,13 +19,16 @@ public class CampaignController {
 
     private final CampaignService service;
     private final UserService userService;
+    private final CampaignParticipantService participantService;
 
     public CampaignController(
             CampaignService service,
-            UserService userService) {
+            UserService userService,
+            CampaignParticipantService participantService) {
 
         this.service = service;
         this.userService = userService;
+        this.participantService = participantService;
     }
 
     // BRAND → CREATE CAMPAIGN
@@ -89,6 +94,17 @@ public class CampaignController {
         return service.completeCampaign(
                 id,
                 brand);
+    }
+
+    // BRAND → VIEW PARTICIPANTS
+    @GetMapping("/{campaignId}/participants")
+    public List<CampaignParticipantResponse>
+    participants(
+            @PathVariable Long campaignId) {
+
+        return participantService
+                .getCampaignParticipants(
+                        campaignId);
     }
 }
 

@@ -11,5 +11,11 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     List<Campaign> findByBrand_Id(Long brandId);
 
     List<Campaign> findByStatus(CampaignStatus status);
+
+    long countByBrand_Id(Long brandId);
+
+    long countByBrand_IdAndStatus(
+            Long brandId,
+            CampaignStatus status);
 }
 

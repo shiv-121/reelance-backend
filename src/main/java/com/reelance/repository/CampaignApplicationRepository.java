@@ -15,5 +15,7 @@ public interface CampaignApplicationRepository extends JpaRepository<CampaignApp
             Long campaignId,
             Long influencerId
     );
+
+    long countByCampaign_Brand_Id(Long brandId);
 }
 
