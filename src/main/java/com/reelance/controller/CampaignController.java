@@ -7,6 +7,9 @@ import com.reelance.entity.User;
 import com.reelance.service.CampaignParticipantService;
 import com.reelance.service.CampaignService;
 import com.reelance.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/campaigns")
+@Tag(name = "Campaigns", description = "Campaign management endpoints")
+@SecurityRequirement(name = "Bearer")
 public class CampaignController {
 
     private final CampaignService service;
@@ -33,6 +38,7 @@ public class CampaignController {
 
     // BRAND → CREATE CAMPAIGN
     @PostMapping
+    @Operation(summary = "Create Campaign", description = "Brand creates a new campaign")
     public CampaignResponse createCampaign(
             Authentication authentication,
             @Valid @RequestBody CampaignRequest request) {
@@ -48,6 +54,7 @@ public class CampaignController {
 
     // BRAND → MY CAMPAIGNS
     @GetMapping("/brand")
+    @Operation(summary = "Get My Campaigns", description = "Retrieve all campaigns created by the logged-in brand")
     public List<CampaignResponse> myCampaigns(
             Authentication authentication) {
 
@@ -61,6 +68,7 @@ public class CampaignController {
 
     // INFLUENCER → BROWSE CAMPAIGNS
     @GetMapping
+    @Operation(summary = "Browse Open Campaigns", description = "Get all open campaigns for browsing")
     public List<CampaignResponse> browseCampaigns() {
 
         return service.getOpenCampaigns();
@@ -68,6 +76,7 @@ public class CampaignController {
 
     // BRAND → CLOSE CAMPAIGN
     @PatchMapping("/{id}/close")
+    @Operation(summary = "Close Campaign", description = "Brand closes a campaign (changes status to CLOSED)")
     public CampaignResponse closeCampaign(
             @PathVariable Long id,
             Authentication authentication) {
@@ -83,6 +92,7 @@ public class CampaignController {
 
     // BRAND → COMPLETE CAMPAIGN
     @PatchMapping("/{id}/complete")
+    @Operation(summary = "Complete Campaign", description = "Brand completes a campaign (changes status to COMPLETED)")
     public CampaignResponse completeCampaign(
             @PathVariable Long id,
             Authentication authentication) {
@@ -98,6 +108,7 @@ public class CampaignController {
 
     // BRAND → VIEW PARTICIPANTS
     @GetMapping("/{campaignId}/participants")
+    @Operation(summary = "Get Campaign Participants", description = "View all participants (accepted influencers) for a campaign")
     public List<CampaignParticipantResponse>
     participants(
             @PathVariable Long campaignId) {

@@ -6,6 +6,9 @@ import com.reelance.entity.ApplicationStatus;
 import com.reelance.entity.User;
 import com.reelance.service.CampaignApplicationService;
 import com.reelance.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +17,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/campaign-applications")
+@Tag(name = "Campaign Applications", description = "Campaign application management")
+@SecurityRequirement(name = "Bearer")
 public class CampaignApplicationController {
 
     private final CampaignApplicationService service;
@@ -29,6 +34,7 @@ public class CampaignApplicationController {
 
     // INFLUENCER → APPLY
     @PostMapping
+    @Operation(summary = "Apply to Campaign", description = "Influencer submits an application for a campaign")
     public CampaignApplicationResponse apply(
             Authentication authentication,
             @Valid @RequestBody
@@ -45,6 +51,7 @@ public class CampaignApplicationController {
 
     // BRAND → VIEW APPLICATIONS
     @GetMapping("/campaign/{campaignId}")
+    @Operation(summary = "Get Campaign Applications", description = "View all applications for a specific campaign")
     public List<CampaignApplicationResponse>
     campaignApplications(
             @PathVariable Long campaignId) {
@@ -55,6 +62,7 @@ public class CampaignApplicationController {
 
     // INFLUENCER → MY APPLICATIONS
     @GetMapping("/my-applications")
+    @Operation(summary = "Get My Applications", description = "View all applications submitted by the influencer")
     public List<CampaignApplicationResponse>
     myApplications(
             Authentication authentication) {
@@ -69,6 +77,7 @@ public class CampaignApplicationController {
 
     // BRAND → ACCEPT / REJECT
     @PatchMapping("/{id}")
+    @Operation(summary = "Update Application Status", description = "Brand accepts or rejects a campaign application")
     public CampaignApplicationResponse updateStatus(
             @PathVariable Long id,
             @RequestParam ApplicationStatus status,

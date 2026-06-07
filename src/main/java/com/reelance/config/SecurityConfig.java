@@ -38,7 +38,12 @@ public class SecurityConfig {
                         // 🔓 PUBLIC ENDPOINTS
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/influencers/**"
+                                "/api/influencers/**",
+                                // 📚 Swagger UI
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**"
                         ).permitAll()
 
                         // 👤 INFLUENCER ACTIONS (ORDER MATTERS)

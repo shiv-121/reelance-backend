@@ -13,6 +13,24 @@ spring:
       hibernate:
         format_sql: false
 
+  # Swagger UI Configuration
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    syntax-highlight:
+      activated: true
+      theme: dracula
+  show-actuator: false
+
 logging:
   level:
     org.hibernate.SQL: OFF
