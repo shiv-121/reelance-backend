@@ -11,8 +11,10 @@ import com.reelance.specification.InfluencerProfileSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class InfluencerProfileService {
@@ -70,6 +72,48 @@ public class InfluencerProfileService {
                 );
     }
 
+
+    public InfluencerProfileResponse
+    updateProfile(
+            InfluencerProfileRequest request) {
+
+        String username =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        User user =
+                userRepository
+                        .findByEmail(username)
+                        .orElseThrow();
+
+        InfluencerProfile profile =
+                profileRepository
+                        .findByUser(user)
+                        .orElseThrow();
+
+        profile.setInstagramHandle(
+                normalizeHandle(
+                        request.getInstagramHandle()
+                )
+        );
+
+        profile.setFollowers(
+                request.getFollowers());
+
+        profile.setNiche(
+                request.getNiche());
+
+        profile.setPricePerPost(
+                request.getPricePerPost());
+
+        profileRepository.save(profile);
+
+        return mapToResponse(profile);
+    }
+
+
     // ===============================
     // PUBLIC SEARCH
     // ===============================
@@ -112,8 +156,13 @@ public class InfluencerProfileService {
                 profileRepository
                         .findByUser(user)
                         .orElseThrow(() ->
-                                new RuntimeException(
+
+                                new ResponseStatusException(
+
+                                        HttpStatus.NOT_FOUND,
+
                                         "Profile not found"
+
                                 )
                         );
 
@@ -138,5 +187,23 @@ public class InfluencerProfileService {
     // ===============================
     private String normalizeHandle(String handle) {
         return handle.trim().toLowerCase();
+    }
+    private InfluencerProfileResponse mapToResponse(
+            InfluencerProfile profile) {
+
+        return new InfluencerProfileResponse(
+
+                profile.getId(),
+
+                profile.getInstagramHandle(),
+
+                profile.getFollowers(),
+
+                profile.getNiche(),
+
+                profile.getPricePerPost(),
+
+                profile.getUser().getUsername()
+        );
     }
 }

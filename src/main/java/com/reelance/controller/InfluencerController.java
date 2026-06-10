@@ -1,5 +1,6 @@
 package com.reelance.controller;
 
+import com.reelance.dto.InfluencerProfileRequest;
 import com.reelance.dto.InfluencerProfileResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,4 +33,19 @@ public class InfluencerController {
                         .getMyProfile()
         );
     }
+
+
+
+    @PutMapping("/profile")
+    public ResponseEntity<InfluencerProfileResponse>
+    updateProfile(
+            @RequestBody
+            InfluencerProfileRequest request) {
+
+        return ResponseEntity.ok(
+                influencerProfileService
+                        .updateProfile(request)
+        );
+    }
+
 }
