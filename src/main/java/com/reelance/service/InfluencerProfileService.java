@@ -1,24 +1,29 @@
 package com.reelance.service;
 
 import com.reelance.dto.InfluencerProfileRequest;
+import com.reelance.dto.InfluencerProfileResponse;
 import com.reelance.entity.InfluencerProfile;
 import com.reelance.entity.User;
 import com.reelance.exception.InstagramHandleAlreadyExistsException;
 import com.reelance.repository.InfluencerProfileRepository;
+import com.reelance.repository.UserRepository;
 import com.reelance.specification.InfluencerProfileSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InfluencerProfileService {
 
     private final InfluencerProfileRepository profileRepository;
+    private final UserRepository userRepository;
 
     public InfluencerProfileService(
-            InfluencerProfileRepository profileRepository) {
+            InfluencerProfileRepository profileRepository, UserRepository userRepository) {
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
     }
 
     // ===============================
@@ -88,6 +93,44 @@ public class InfluencerProfileService {
                         );
 
         return profileRepository.findAll(spec, pageable);
+    }
+
+    public InfluencerProfileResponse getMyProfile() {
+
+        String email =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow();
+
+        InfluencerProfile profile =
+                profileRepository
+                        .findByUser(user)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Profile not found"
+                                )
+                        );
+
+        return new InfluencerProfileResponse(
+
+                profile.getId(),
+
+                profile.getInstagramHandle(),
+
+                profile.getFollowers(),
+
+                profile.getNiche(),
+
+                profile.getPricePerPost(),
+
+                user.getUsername()
+        );
     }
 
     // ===============================

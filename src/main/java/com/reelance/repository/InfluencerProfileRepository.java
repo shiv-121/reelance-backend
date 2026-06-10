@@ -1,6 +1,7 @@
 package com.reelance.repository;
 
 import com.reelance.entity.InfluencerProfile;
+import com.reelance.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface InfluencerProfileRepository
         extends JpaRepository<InfluencerProfile, Long>,
         JpaSpecificationExecutor<InfluencerProfile> {
 
+
+    Optional<InfluencerProfile> findByUser(User user);
 
     // For authenticated influencer (create/update profile)
     Optional<InfluencerProfile> findByUserId(Long userId);
