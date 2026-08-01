@@ -2,12 +2,19 @@ package com.reelance.service;
 
 import com.reelance.dto.CampaignRequest;
 import com.reelance.dto.CampaignResponse;
+import com.reelance.dto.CampaignSummaryResponse;
+import com.reelance.dto.CampaignWorkspaceResponse;
 import com.reelance.entity.Campaign;
 import com.reelance.entity.CampaignStatus;
 import com.reelance.entity.User;
 import com.reelance.repository.CampaignRepository;
+import com.reelance.specification.CampaignSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,6 +67,60 @@ public class CampaignService {
                 .stream()
                 .map(this::map)
                 .toList();
+    }
+
+    // BRAND → WORKSPACE WITH SEARCH, FILTER, SORT, PAGINATION
+    public CampaignWorkspaceResponse getBrandCampaignsWorkspace(
+            User brand,
+            String search,
+            CampaignStatus status,
+            String niche,
+            Long budgetMin,
+            Long budgetMax,
+            LocalDate deadlineBefore,
+            LocalDate deadlineAfter,
+            Pageable pageable) {
+
+        // Build specification with filters
+        Specification<Campaign> spec = CampaignSpecification.filterByBrandAndCriteria(
+                brand.getId(),
+                search,
+                status,
+                niche,
+                budgetMin,
+                budgetMax,
+                deadlineBefore,
+                deadlineAfter
+        );
+
+        // Execute paginated query
+        Page<Campaign> page = repository.findAll(spec, pageable);
+
+        // Map campaigns to summary responses
+        List<CampaignSummaryResponse> campaigns = page.getContent()
+                .stream()
+                .map(this::mapToSummary)
+                .toList();
+
+        // Get counts for dashboard
+        long totalCampaigns = repository.countByBrand_Id(brand.getId());
+        long openCampaigns = repository.countByBrand_IdAndStatus(brand.getId(), CampaignStatus.OPEN);
+        long closedCampaigns = repository.countByBrand_IdAndStatus(brand.getId(), CampaignStatus.CLOSED);
+        long completedCampaigns = repository.countByBrand_IdAndStatus(brand.getId(), CampaignStatus.COMPLETED);
+        long totalBudget = repository.sumBudgetByBrandId(brand.getId());
+
+        return new CampaignWorkspaceResponse(
+                campaigns,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                totalCampaigns,
+                openCampaigns,
+                closedCampaigns,
+                completedCampaigns,
+                totalBudget
+        );
     }
 
     // BRAND → CLOSE CAMPAIGN
@@ -132,6 +193,18 @@ public class CampaignService {
                 campaign.getDeadline(),
                 campaign.getStatus(),
                 campaign.getBrand().getUsername()
+        );
+    }
+
+    private CampaignSummaryResponse mapToSummary(Campaign campaign) {
+        return new CampaignSummaryResponse(
+                campaign.getId(),
+                campaign.getTitle(),
+                campaign.getDescription(),
+                campaign.getBudget(),
+                campaign.getNiche(),
+                campaign.getDeadline(),
+                campaign.getStatus()
         );
     }
 }

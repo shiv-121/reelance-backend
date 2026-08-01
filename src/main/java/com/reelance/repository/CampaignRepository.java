@@ -3,11 +3,12 @@ package com.reelance.repository;
 import com.reelance.entity.Campaign;
 import com.reelance.entity.CampaignStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface CampaignRepository extends JpaRepository<Campaign, Long> {
+public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSpecificationExecutor<Campaign> {
 
     List<Campaign> findByBrand_Id(Long brandId);
 
