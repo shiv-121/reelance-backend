@@ -62,7 +62,9 @@ public class SecurityConfig {
                                 "/api/collaborations",
                                 "/api/collaborations/brand/**",
                                 // Brands can create/manage campaigns (other than the public browse endpoint)
-                                "/api/campaigns/**"
+                                "/api/campaigns/**",
+                                // Brand dashboard and analytics
+                                "/api/brand/**"
                         ).hasRole("BRAND")
 
                         // 📋 CAMPAIGN APPLICATIONS

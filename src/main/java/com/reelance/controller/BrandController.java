@@ -1,15 +1,13 @@
 package com.reelance.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/brand")
+/**
+ * @deprecated This controller was replaced by DashboardController.
+ * All brand dashboard endpoints are now under /api/brand:
+ * - GET /api/brand/dashboard - Comprehensive dashboard
+ * - GET /api/brand/analytics - Analytics metrics
+ */
+@Deprecated
 public class BrandController {
-
-    @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('BRAND')")
-    public String brandDashboard() {
-        return "Welcome Brand 💼";
-    }
+    // This class is deprecated. Use DashboardController instead.
 }
+

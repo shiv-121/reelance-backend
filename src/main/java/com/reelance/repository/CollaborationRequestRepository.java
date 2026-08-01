@@ -24,4 +24,5 @@ public interface CollaborationRequestRepository
             CollaborationStatus status
     );
 
+    long countByBrand_IdAndStatus(Long brandId, CollaborationStatus status);
 }
