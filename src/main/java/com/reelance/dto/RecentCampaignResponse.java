@@ -9,6 +9,8 @@ public record RecentCampaignResponse(
         String title,
         CampaignStatus status,
         Long budget,
-        LocalDate deadline
+        LocalDate deadline,
+        long applicationCount,
+        long pendingApplicationCount,
+        long acceptedApplicationCount
 ) {}
-

@@ -34,49 +34,183 @@ public class BrandDashboardService {
 
         Long brandId = brand.getId();
 
-        // Count metrics
-        long activeCampaigns = campaignRepository.countByBrand_IdAndStatus(brandId, CampaignStatus.OPEN);
-        long pendingApplications = applicationRepository.countByCampaign_Brand_IdAndStatus(brandId, ApplicationStatus.PENDING);
-        long acceptedApplications = applicationRepository.countByCampaign_Brand_IdAndStatus(brandId, ApplicationStatus.ACCEPTED);
-        long totalBudget = campaignRepository.sumBudgetByBrandId(brandId);
+        /*
+         * ============================
+         * CAMPAIGN METRICS
+         * ============================
+         */
 
-        // Get recent campaigns with optimized query
-        List<RecentCampaignResponse> recentCampaigns = campaignRepository
-                .findTop5ByBrand_IdOrderByCreatedAtDesc(brandId)
-                .stream()
-                .map(this::mapCampaign)
-                .toList();
+        long totalCampaigns =
+                campaignRepository.countByBrand_Id(brandId);
 
-        // Get recent applications with fetch joins to avoid N+1 (limit to 5 results)
-        Pageable top5 = PageRequest.of(0, 5);
-        List<RecentApplicationResponse> recentApplications = applicationRepository
-                .findRecentApplicationsForBrand(brandId, top5)
-                .stream()
-                .map(this::mapApplication)
-                .toList();
+        long activeCampaigns =
+                campaignRepository.countByBrand_IdAndStatus(
+                        brandId,
+                        CampaignStatus.OPEN
+                );
+
+        long completedCampaigns =
+                campaignRepository.countByBrand_IdAndStatus(
+                        brandId,
+                        CampaignStatus.COMPLETED
+                );
+
+        long closedCampaigns =
+                campaignRepository.countByBrand_IdAndStatus(
+                        brandId,
+                        CampaignStatus.CLOSED
+                );
+
+        /*
+         * ============================
+         * APPLICATION METRICS
+         * ============================
+         */
+
+        long totalApplications =
+                applicationRepository.countByCampaign_Brand_Id(
+                        brandId
+                );
+
+        long pendingApplications =
+                applicationRepository.countByCampaign_Brand_IdAndStatus(
+                        brandId,
+                        ApplicationStatus.PENDING
+                );
+
+        long acceptedApplications =
+                applicationRepository.countByCampaign_Brand_IdAndStatus(
+                        brandId,
+                        ApplicationStatus.ACCEPTED
+                );
+
+        long rejectedApplications =
+                applicationRepository.countByCampaign_Brand_IdAndStatus(
+                        brandId,
+                        ApplicationStatus.REJECTED
+                );
+
+        /*
+         * ============================
+         * BUDGET
+         * ============================
+         */
+
+        long totalBudget =
+                campaignRepository.sumBudgetByBrandId(brandId);
+
+        /*
+         * ============================
+         * RATES
+         * ============================
+         */
+
+        double acceptanceRate =
+                totalApplications == 0
+                        ? 0
+                        : ((double) acceptedApplications
+                           / totalApplications) * 100;
+
+        double completionRate =
+                totalCampaigns == 0
+                        ? 0
+                        : ((double) completedCampaigns
+                           / totalCampaigns) * 100;
+
+        /*
+         * ============================
+         * RECENT CAMPAIGNS
+         * ============================
+         */
+
+        List<RecentCampaignResponse> recentCampaigns =
+                campaignRepository
+                        .findTop5ByBrand_IdOrderByCreatedAtDesc(brandId)
+                        .stream()
+                        .map(this::mapCampaign)
+                        .toList();
+
+        /*
+         * ============================
+         * RECENT APPLICATIONS
+         * ============================
+         */
+
+        Pageable top5 =
+                PageRequest.of(0, 5);
+
+        List<RecentApplicationResponse> recentApplications =
+                applicationRepository
+                        .findRecentApplicationsForBrand(
+                                brandId,
+                                top5
+                        )
+                        .stream()
+                        .map(this::mapApplication)
+                        .toList();
 
         return new BrandDashboardResponse(
+
+                totalCampaigns,
                 activeCampaigns,
+                completedCampaigns,
+                closedCampaigns,
+                totalApplications,
                 pendingApplications,
                 acceptedApplications,
+                rejectedApplications,
                 totalBudget,
+                acceptanceRate,
+                completionRate,
                 recentCampaigns,
                 recentApplications
         );
     }
 
-    private RecentCampaignResponse mapCampaign(Campaign campaign) {
+    private RecentCampaignResponse mapCampaign(
+            Campaign campaign) {
+
+        Long campaignId =
+                campaign.getId();
+
+        long applicationCount =
+                applicationRepository
+                        .countByCampaign_Id(
+                                campaignId
+                        );
+
+        long pendingApplicationCount =
+                applicationRepository
+                        .countByCampaign_IdAndStatus(
+                                campaignId,
+                                ApplicationStatus.PENDING
+                        );
+
+        long acceptedApplicationCount =
+                applicationRepository
+                        .countByCampaign_IdAndStatus(
+                                campaignId,
+                                ApplicationStatus.ACCEPTED
+                        );
+
         return new RecentCampaignResponse(
+
                 campaign.getId(),
                 campaign.getTitle(),
                 campaign.getStatus(),
                 campaign.getBudget(),
-                campaign.getDeadline()
+                campaign.getDeadline(),
+                applicationCount,
+                pendingApplicationCount,
+                acceptedApplicationCount
         );
     }
 
-    private RecentApplicationResponse mapApplication(CampaignApplication application) {
+    private RecentApplicationResponse mapApplication(
+            CampaignApplication application) {
+
         return new RecentApplicationResponse(
+
                 application.getId(),
                 application.getCampaign().getId(),
                 application.getInfluencer().getId(),
@@ -87,8 +221,3 @@ public class BrandDashboardService {
         );
     }
 }
-
-
-
-
-

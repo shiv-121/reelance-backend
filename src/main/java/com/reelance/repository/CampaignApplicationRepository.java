@@ -29,5 +29,12 @@ public interface CampaignApplicationRepository extends JpaRepository<CampaignApp
            "WHERE c.brand.id = :brandId " +
            "ORDER BY ca.createdAt DESC")
     List<CampaignApplication> findRecentApplicationsForBrand(Long brandId, Pageable pageable);
+
+    long countByCampaign_Id(Long campaignId);
+
+    long countByCampaign_IdAndStatus(
+            Long campaignId,
+            ApplicationStatus status
+    );
 }
 
