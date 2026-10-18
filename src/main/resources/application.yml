@@ -1,8 +1,11 @@
 spring:
   datasource:
+  #  url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/reelance}
     url: jdbc:postgresql://localhost:5432/reelance
     username: reelance_user
     password: reelance123
+ #   username: ${SPRING_DATASOURCE_USERNAME:reelance_user}
+ #   password: ${SPRING_DATASOURCE_PASSWORD:reelance123}
     driver-class-name: org.postgresql.Driver
 
   jpa:

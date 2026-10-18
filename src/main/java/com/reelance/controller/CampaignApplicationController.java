@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,9 +76,10 @@ public class CampaignApplicationController {
                 influencer);
     }
 
-    // BRAND → ACCEPT / REJECT
+    // BRAND → SHORTLIST / ACCEPT / REJECT
     @PatchMapping("/{id}")
-    @Operation(summary = "Update Application Status", description = "Brand accepts or rejects a campaign application")
+    @PreAuthorize("hasRole('BRAND')")
+    @Operation(summary = "Update Application Status", description = "Brand shortlists, accepts, or rejects a campaign application")
     public CampaignApplicationResponse updateStatus(
             @PathVariable Long id,
             @RequestParam ApplicationStatus status,

@@ -6,10 +6,13 @@ import com.reelance.entity.*;
 import com.reelance.repository.CampaignApplicationRepository;
 import com.reelance.repository.CampaignParticipantRepository;
 import com.reelance.repository.CampaignRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CampaignApplicationService {
@@ -85,16 +88,23 @@ public class CampaignApplicationService {
                 .toList();
     }
 
-    // BRAND → ACCEPT / REJECT
+    // BRAND → ACCEPT / REJECT / SHORTLIST
     public CampaignApplicationResponse updateStatus(
             Long applicationId,
             ApplicationStatus status,
             User brand) {
 
+        if (brand == null || brand.getRole() != Role.BRAND) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only brands can update application status");
+        }
+
         CampaignApplication application =
                 repository.findById(applicationId)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
                                         "Application not found"));
 
         if (!application.getCampaign()
@@ -102,13 +112,14 @@ public class CampaignApplicationService {
                 .getId()
                 .equals(brand.getId())) {
 
-            throw new RuntimeException(
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
                     "Unauthorized");
         }
 
+        validateStatusTransition(application, status);
         application.setStatus(status);
 
-        // If application is accepted, create a participant
         if (status == ApplicationStatus.ACCEPTED) {
             if (!participantRepository.existsByCampaign_IdAndInfluencer_Id(
                     application.getCampaign().getId(),
@@ -125,6 +136,59 @@ public class CampaignApplicationService {
         }
 
         return map(repository.save(application));
+    }
+
+    private void validateStatusTransition(
+            CampaignApplication application,
+            ApplicationStatus requestedStatus) {
+
+        if (requestedStatus == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Status is required");
+        }
+
+        ApplicationStatus currentStatus = application.getStatus();
+        Campaign campaign = application.getCampaign();
+
+        if (campaign == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Campaign is missing from the application");
+        }
+
+        Set<ApplicationStatus> validTransitions = switch (currentStatus) {
+            case PENDING -> Set.of(
+                    ApplicationStatus.SHORTLISTED,
+                    ApplicationStatus.ACCEPTED,
+                    ApplicationStatus.REJECTED
+            );
+            case SHORTLISTED -> Set.of(
+                    ApplicationStatus.ACCEPTED,
+                    ApplicationStatus.REJECTED
+            );
+            case ACCEPTED, REJECTED -> Set.of();
+        };
+
+        if (!validTransitions.contains(requestedStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid status transition: "
+                            + currentStatus
+                            + " -> "
+                            + requestedStatus);
+        }
+
+        if (Set.of(
+                ApplicationStatus.SHORTLISTED,
+                ApplicationStatus.ACCEPTED,
+                ApplicationStatus.REJECTED
+        ).contains(requestedStatus)
+                && campaign.getStatus() != CampaignStatus.OPEN) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Applications can only be shortlisted, accepted, or rejected while the campaign is open");
+        }
     }
 
     private CampaignApplicationResponse map(
