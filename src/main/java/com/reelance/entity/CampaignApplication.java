@@ -23,6 +23,16 @@ public class CampaignApplication {
 
     private Long expectedPrice;
 
+    private Long currentOfferPrice;
+
+    private Long finalAgreedPrice;
+
+    @Enumerated(EnumType.STRING)
+    private NegotiationStatus negotiationStatus;
+
+    @Enumerated(EnumType.STRING)
+    private NegotiationParty nextResponseParty;
+
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
